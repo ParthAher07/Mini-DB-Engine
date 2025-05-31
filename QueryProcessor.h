@@ -1,5 +1,6 @@
 #pragma once
 #include <bits/stdc++.h>
+#include "ErrorHandling.h"
 using namespace std;
 
 class QueryProcessor
@@ -13,9 +14,11 @@ private:
         "help","tables","select","from","where",
         "and","or",
     };
-    vector<string> Tokens;
 
+    ErrorHandling errorHandler{"SchemaFile.txt"}; // Assuming the schema file is named "Schema.txt"
+    
 public:
+    vector<string> Tokens;
     QueryProcessor(){};
     void run(const string &query);
     void ParseIntoTokens(const string &query);
@@ -96,13 +99,14 @@ void QueryProcessor::DisplayTokens() const
     cout << "Tokens: ";
     for (const string &token : Tokens)
     {
-        cout << token << " ";
+        cout << token << "\n";
     }
     cout << endl;
 }
 
-// void QueryProcessor::executeQuery()
-// {
+void QueryProcessor::executeQuery()
+{
+    cout << "Executing query..." << endl;
 //     if (Tokens.empty())
 //         return;
 
@@ -161,7 +165,7 @@ void QueryProcessor::DisplayTokens() const
 //     {
 //         cout << "INVALID QUERY" << endl;
 //     }
-// };
+};
 
 void QueryProcessor::run(const string &Query)
 {
@@ -174,5 +178,15 @@ void QueryProcessor::run(const string &Query)
         ParseIntoTokens(Query);
         ToSmallerCase();
         DisplayTokens();
+    }
+
+    bool noerrors = errorHandler.ErrorsChecking(Tokens);
+    if (noerrors)
+    {
+        executeQuery();
+    }
+    else
+    {
+        cout << "Query execution failed due to errors." << endl;
     }
 }
