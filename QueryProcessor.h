@@ -1,6 +1,7 @@
 #pragma once
 #include <bits/stdc++.h>
 #include "ErrorHandling.h"
+#include "HelpCommands.h"
 using namespace std;
 
 class QueryProcessor
@@ -15,7 +16,8 @@ private:
         "and","or",
     };
 
-    ErrorHandling errorHandler{"SchemaFile.txt"}; // Assuming the schema file is named "Schema.txt"
+    ErrorHandling error_class{"SchemaFile.txt"}; // Assuming the schema file is named "Schema.txt"
+    Help help_class; // Assuming HelpCommands is a class that handles help commands
     
 public:
     vector<string> Tokens;
@@ -107,8 +109,8 @@ void QueryProcessor::DisplayTokens() const
 void QueryProcessor::executeQuery()
 {
     cout << "Executing query..." << endl;
-//     if (Tokens.empty())
-//         return;
+    if (Tokens.empty())
+        return;
 
 //     if (Tokens[0] == "create" && Tokens[1] == "table")
 //     {
@@ -130,10 +132,10 @@ void QueryProcessor::executeQuery()
 //         HelpTables();
 //     }
 
-//     else if (Tokens[0] == "help")
-//     {
-//         HelpCommand(Tokens);
-//     }
+    else if (Tokens[0] == "help")
+    {
+        help_class.HelpCommand(Tokens);
+    }
 
 //     else if (Tokens[0] == "insert" && Tokens[1] == "into")
 //     {
@@ -180,7 +182,7 @@ void QueryProcessor::run(const string &Query)
         DisplayTokens();
     }
 
-    bool noerrors = errorHandler.ErrorsChecking(Tokens);
+    bool noerrors = error_class.ErrorsChecking(Tokens);
     if (noerrors)
     {
         executeQuery();

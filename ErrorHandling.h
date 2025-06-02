@@ -6,7 +6,7 @@ class QueryProcessor; // Forward declaration to allow access to QueryProcessor
 
 class ErrorHandling {
 
-public:
+private:
     string schemaFileName;
 
     bool doesTableExists(string tableName) const;
@@ -27,7 +27,7 @@ public:
 ErrorHandling::ErrorHandling(string fileName) : schemaFileName(fileName) {}
 
 bool ErrorHandling::doesTableExists(string tableName) const {
-    fstream SchemaFile(schemaFileName, ios::in);
+    fstream SchemaFile(schemaFileName);
     if (!SchemaFile)
         return false;
 

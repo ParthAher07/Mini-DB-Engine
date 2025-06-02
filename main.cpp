@@ -1,6 +1,5 @@
 #include<bits/stdc++.h>
 #include "QueryProcessor.h" 
-#include "ErrorHandling.h"
 using namespace std;
 
 int main(){
