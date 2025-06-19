@@ -1,114 +1,18 @@
 #include <bits/stdc++.h>
 using namespace std;
+vector<string> attributes_of_table;
 
-class TableManager; // Forward declaration to allow access to TableManager
-
-class Util {
-public:
-    static string ExtractCol(const string& tuple, int colno);
-    static bool isInt(const string& s);
-    static vector<string> split(const string& s, char delim);
-
-    friend class TableManager; // Allow TableManager to access private members if needed
-};
-
-class SchemaManager {
-public:
-    bool doesTableExists2(const string& tableName);
-    void CreateTable(vector<string>& Tokens);
-    void delete_last_line();
-    void DropTable(vector<string>& Tokens);
-    void DescribeTable(vector<string>& Tokens);
-    int Count_no_Attributes(const string& TableName);
-    void FillingAttributesOfTable(const string& tableName);
-
-    vector<string> attributes_of_table; // Shared for table manager access
-};
-
-class TableManager {
-    SchemaManager& schema;
-    Util util;
-
-    int checkValuesOrder(vector<string>& Tokens);
-    vector<int> Find_Indices(vector<string>&Tokens,vector<string> attributes_of_table);
-    bool is_Where_True(const string& tuple, vector<string>& Tokens, int i);
-    void Helper_Select(vector<string>& Tokens, const string& TableNameInQuery, int i);
-    vector<int> GetIndices(const string& tableName, map<string, string>& mpp);
-
-public:
-    TableManager(SchemaManager& sm) : schema(sm) {}
-
-    int InsertInto(vector<string>& Tokens);
-    void Select(vector<string>& Tokens);
-    void UpdateTable(vector<string>& Tokens);
-    void DeleteFrom(vector<string>& Tokens);
-};
-
-
-// Implementation of Util methods
-
-string Util::ExtractCol(const string& tuple, int colno) {
-     //tuple = <103,PA,24-02-2001>, colno=1, will return PA
-    int comma=0;
-    int i=1;
-    while(comma<colno)
-    {
-        if(tuple[i]==',')
-            comma++;
-        i++;
-    }
-    
-    
-    string pk="";
-    while(tuple[i]!=','&& tuple[i]!='>')
-    {
-        pk+=tuple[i];
-        i++;
-    }
-    //cout<<"pk: "<<pk<<endl;
-    return pk;
-}
-
-bool Util::isInt(const string& s) {
-    for(char c : s)
-        if(!isdigit(c))
-            return false;
-    return true;
-}
-
-vector<string> Util::split(const string& s, char delim) {
-    vector<string> result;
-    stringstream ss(s);
-    string item;
-
-    while (getline(ss, item, delim)) {
-        result.push_back(item);
-    }
-
-    return result;
-}
-
-
-// Implementation of SchemaManager methods
-
-
-bool SchemaManager::doesTableExists2(const string& tableName)
+bool doesTableExists2(string tableName)
 {
     fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt");
-
-    if(!SchemaFile){
-        cout << "Schema File not found" << endl;
-        return 0;
-    }
-
+    SchemaFile.open("SchemaFile.txt",ios::in);
     if(SchemaFile)
     {
         string line;
         while(!SchemaFile.eof())
         {
             getline(SchemaFile,line);
-            if(line[0]=='*')  // *TableName*
+            if(line[0]=='*')
             {
                 string name = line.substr(1,line.size()-2);
                 if(name==tableName)
@@ -124,19 +28,13 @@ bool SchemaManager::doesTableExists2(const string& tableName)
     return false;
 }
 
-
-void SchemaManager::CreateTable(vector<string>&Tokens)
+void CreateTable(vector<string>&Tokens)
 {
     //If control comes here means, table with specified name doesn't exists
     //So, Append the name of table and its attribute to schema file
     {
         fstream SchemaFile;
-        SchemaFile.open("SchemaFile.txt");
-
-        if(!SchemaFile){
-            cout << "Schema File not found" << endl;
-            return;
-        }
+        SchemaFile.open("SchemaFile.txt",ios::app);
 
         SchemaFile << "*" << Tokens[2] << "*" << endl << "<<" << endl;
         SchemaFile << "pk: " << Tokens.back() << endl;
@@ -181,25 +79,23 @@ void SchemaManager::CreateTable(vector<string>&Tokens)
         
 }
 
-void SchemaManager::delete_last_line()
+void delete_last_line()
 {   
-    ifstream fileIn( "SchemaFile.txt" );     
-    
-    // Open for reading
+    ifstream fileIn( "SchemaFile.txt" );                   // Open for reading
 
-    stringstream buffer;                                  // Store contents in a std::string
+    stringstream buffer;                             // Store contents in a std::string
     buffer << fileIn.rdbuf();
     string contents = buffer.str();
 
     fileIn.close();
     contents.pop_back();                                  // Remove last character
 
-    ofstream fileOut( "SchemaFile.txt");                  // Open for writing (while also clearing file)
+
+    ofstream fileOut( "SchemaFile.txt" , ios::trunc); // Open for writing (while also clearing file)
     fileOut << contents;                                  // Output contents with removed character
     fileOut.close(); 
 }
-
-void SchemaManager::DropTable(vector<string>& Tokens)
+void DropTable(vector<string>&Tokens)
 {
     //drop table Students;
     fstream SchemaFile;
@@ -238,15 +134,10 @@ void SchemaManager::DropTable(vector<string>& Tokens)
     delete_last_line();
 }
 
-void SchemaManager::DescribeTable(vector<string>& Tokens)
+void DescribeTable(vector<string>&Tokens)
 {
     fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt");
-
-    if(!SchemaFile){
-        cout << "Schema File not found" << endl;
-        return;
-    }
+    SchemaFile.open("SchemaFile.txt",ios::in);
 
     string line;
     while(!SchemaFile.eof())
@@ -264,21 +155,14 @@ void SchemaManager::DescribeTable(vector<string>& Tokens)
             }
             break;
         }    
-    }     
+    }    
 }
 
-int SchemaManager::Count_no_Attributes(const string& TableName)
+int Count_no_Attributes(string TableName)
 {
-    //cout << "Counting attributes for table: " << TableName << endl;
     //This function returns the number of attributes of the table-tableName
     fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt");
-
-    if(!SchemaFile){
-        cout << "Schema File not found" << endl;
-        return 0;
-    }
-
+    SchemaFile.open("SchemaFile.txt",ios::in);
     int attributes=0;
 
     if(SchemaFile)
@@ -300,8 +184,6 @@ int SchemaManager::Count_no_Attributes(const string& TableName)
                         attributes++;
                         getline(SchemaFile,line);
                     }
-
-                    //cout << "Number of attributes in table <" << TableName << "> is: " << attributes - 1 << endl;
                     return attributes-1;
                 }
             }
@@ -312,56 +194,43 @@ int SchemaManager::Count_no_Attributes(const string& TableName)
 
     return 0;
 }
-
-void SchemaManager::FillingAttributesOfTable(const string& tableName)
+string ExtractCol(string tuple,int colno)//<102,Saurabh Yelmame,24-02-2001>
 {
-  attributes_of_table.clear();
-    fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt",ios::in);
-    string line;
-    while(!SchemaFile.eof())
+    //tuple = <103,S Y,24-02-2001>, colno=1, will return SY
+    int comma=0;
+    int i=1;
+    while(comma<colno)
     {
-        getline(SchemaFile,line);
-        if(line[0]=='*')
-        {
-            string name = line.substr(1,line.size()-2);
-            if(name==tableName)
-            {
-                getline(SchemaFile,line);//<<
-                getline(SchemaFile,line);//pk: 
-
-                while(line!=">>")
-                {
-                    getline(SchemaFile,line);
-                    if(line==">>")break;
-
-                    string temp="";
-                    int i=0;
-                    while(line[i]!=' ')
-                    {
-                        temp += line[i];
-                        i++;
-                    }
-                    attributes_of_table.push_back(temp);
-                }
-
-                SchemaFile.close();
-                break;
-            }
-        }
+        if(tuple[i]==',')
+            comma++;
+        i++;
     }
+    
+    
+    string pk="";
+    while(tuple[i]!=','&& tuple[i]!='>')
+    {
+        pk+=tuple[i];
+        i++;
+    }
+    //cout<<"pk: "<<pk<<endl;
+    return pk;
 }
 
-
-// Implementation of TableManager methods
-
-int TableManager::checkValuesOrder(vector<string>& Tokens) {
-
+bool isInt(string s)
+{
+    for(char c:s)
+        if(!isdigit(c))
+            return false;
+    return true;
+}
+int checkValuesOrder(vector<string>&Tokens)
+{
     //Getting datatypes of table from Schema File
     vector<string> datatypesInSchema;
     string tableName = Tokens[2];
     fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt");
+    SchemaFile.open("SchemaFile.txt",ios::in);
 
     string line;
     string word;
@@ -399,15 +268,23 @@ int TableManager::checkValuesOrder(vector<string>& Tokens) {
             datatypesInTokens.push_back("varchar");
         else if(Tokens[i][2]=='-')
             datatypesInTokens.push_back("date");
-        else if(util.isInt(Tokens[i]))
+        else if(isInt(Tokens[i]))
             datatypesInTokens.push_back("int");
         else
             datatypesInTokens.push_back("decimal");
     }
 
+    cout<<"datatypesInTokens: ";
+    for(auto x:datatypesInTokens)
+        cout<<x<<"  ";
+    cout<<endl;
+
     for(int i=0;i<datatypesInSchema.size();i++)
-        if(datatypesInSchema[i]!=datatypesInTokens[i])
+        if(datatypesInSchema[i]!=datatypesInTokens[i]){
+            cout<<datatypesInSchema[i]<<" != "<<datatypesInTokens[i]<<endl;
             return 0;
+        }
+            
     /*
     cout<<"Schema datatypes: ";
     for(auto x:datatypesInSchema)
@@ -422,145 +299,9 @@ int TableManager::checkValuesOrder(vector<string>& Tokens) {
     return 1;
 
 }
-
-vector<int> TableManager::Find_Indices(vector<string>&Tokens,vector<string> attributes_of_table) {
-
-    //          0  1    2      3    4
-    //Schema : id name gender mob email 
-    
-    //Query  : select name,id,email form Students where id>100;
-    //schema.FillingAttributesOfTable(Tokens[3]);
-
-    vector<int> indices_of_att_in_query;
-    for(int i=1;Tokens[i]!="from";i++)
-    {
-        bool flag=true;
-        for(int j=0;flag && j<attributes_of_table.size();j++){
-                if(Tokens[i]==attributes_of_table[j])
-                {
-                    indices_of_att_in_query.push_back(j);
-                    flag=false;
-                }
-        }
-    }
-
-    return indices_of_att_in_query;
-
-}
-
-bool TableManager::is_Where_True(const string& tuple, vector<string>& Tokens, int i) {
-
-   //cout<<"i:"<<i<<"   Tokens[i]:"<<Tokens[i]<<endl;
-    if(i+1==Tokens.size())return true;
-    //i is pointing to Students here;
-    i++;//After this inc i will point to where
-
-    int index=0;
-    for(auto x:schema.attributes_of_table)
-    {
-        if(x==Tokens[i+1])//Tokens[i+1]==marks
-            break;
-        else
-            index++;
-    }
-    //after this index will be index of 'marks' in attributes_of_table
-
-    bool isFloat = isdigit(Tokens[i+3][0]);
-    
-    if(isFloat)//Floats
-    {   
-        float typecasted = stof(util.ExtractCol(tuple,index));
-        
-        if(Tokens[i+2]==">") {return typecasted > stof(Tokens[i+3]);}
-        if(Tokens[i+2]=="<") {return typecasted < stof(Tokens[i+3]);}
-        if(Tokens[i+2]=="=") {return typecasted == stof(Tokens[i+3]);}
-        if(Tokens[i+2]=="!=") {return typecasted != stof(Tokens[i+3]);}
-    }
-    else//Strings
-    {
-        if(Tokens[i+2]=="!=")     return util.ExtractCol(tuple,index) != (Tokens[i+3]);
-        else if(Tokens[i+2]=="=") return util.ExtractCol(tuple,index) == (Tokens[i+3]);
-    }
-}
-
-void TableManager::Helper_Select(vector<string>& Tokens, const string& TableNameInQuery, int i) {
-
-    if(Tokens[1]=="*")
-    {
-        fstream file;
-        file.open(TableNameInQuery+".txt",ios::in);
-        int attributes = schema.Count_no_Attributes(TableNameInQuery);
-        
-        bool flag=false;
-        string tuple;
-        while(file && !file.eof())
-        {
-            flag=true;
-            getline(file,tuple);//<102,Dipak Yadav,99>
-            if(tuple.size()==0)break;
-
-            if(is_Where_True(tuple,Tokens,i))
-            {
-                for(int j=0;j<attributes;j++)
-                    cout<<left<<setw(25)<<util.ExtractCol(tuple,j);
-                cout<<endl;
-            }
-        }
-        if(!flag)
-            cout<<"No Records yet"<<endl;
-    }
-
-    else
-    {
-        vector<int>indices_of_att_in_query = Find_Indices(Tokens,schema.attributes_of_table);
-
-        fstream file;
-        file.open(TableNameInQuery+".txt",ios::in);
-        
-        bool flag=false;
-        string tuple;
-
-        while(getline(file,tuple))
-        {
-            flag=true;
-            //getline(file,tuple);//<102,Dipak Yadav,99>
-            if(tuple.size()==0)break;
-        
-            
-            if(is_Where_True(tuple,Tokens,i)){
-                for(int x:indices_of_att_in_query)
-                    cout<<util.ExtractCol(tuple,x);
-                cout<<endl;
-            }
-        }
-        if(!flag)
-            cout<<"No Records yet"<<endl;
-    }
-}
-
-vector<int> TableManager::GetIndices(const string& tableName, map<string, string>& mpp) {
-
-    schema.FillingAttributesOfTable(tableName);
-    vector<int>ans;
-    
-    for(auto kv=mpp.begin();kv!=mpp.end();kv++)
-    {
-        int count=0;
-        for(auto x:schema.attributes_of_table)
-        {   
-            //cout<<"attr:"<<x<<"     kv:"<<kv->first<<endl;
-            if(kv->first==x)
-                {ans.push_back(count);break;}
-            count++;
-        }
-    }
-    return ans;
-
-}
-
-int TableManager::InsertInto(vector<string>& Tokens) {
-
-      //If control comes here, means the specified table exists in schema file;
+int InsertInto(vector<string>&Tokens)
+{
+    //If control comes here, means the specified table exists in schema file;
     //1.Checking whether primary key already exists in the table or not
     fstream table;
     table.open(Tokens[2]+".txt",ios::in);
@@ -570,7 +311,7 @@ int TableManager::InsertInto(vector<string>& Tokens) {
     while(table && !table.eof())
     {
         getline(table,tuple);
-        if(Tokens[4]==util.ExtractCol(tuple,0))//0 means primary key
+        if(Tokens[4]==ExtractCol(tuple,0))//0 means primary key
         {
             cout<<"PK already exists"<<endl;
             table.close();
@@ -579,7 +320,7 @@ int TableManager::InsertInto(vector<string>& Tokens) {
     }
 
     //error handling2 : Checking whether the values are specified according to the Schema..
-    int noOfAttributes = schema.Count_no_Attributes(Tokens[2]);
+    int noOfAttributes = Count_no_Attributes(Tokens[2]);
     if( Tokens.size()-4 < noOfAttributes )
     {cout<<"Less Values Specified"<<endl;return 0;}
         
@@ -605,11 +346,163 @@ int TableManager::InsertInto(vector<string>& Tokens) {
 
     TABLE.close();
     return 1;
-
+    
 }
 
-void TableManager::Select(vector<string>& Tokens) {
+vector<int> Find_Indices(vector<string>&Tokens,vector<string> attributes_of_table)
+{
+    //          0  1    2      3    4
+    //Schema : id name gender mob email 
+    
+    //Query  : select name,id,email form Students where id>100;
 
+    vector<int> indices_of_att_in_query;
+    for(int i=1;Tokens[i]!="from";i++)
+    {
+        bool flag=true;
+        for(int j=0;flag && j<attributes_of_table.size();j++)
+            if(Tokens[i]==attributes_of_table[j])
+            {
+                indices_of_att_in_query.push_back(j);
+                flag=false;
+            }
+    }
+
+    return indices_of_att_in_query;
+}
+
+
+bool is_Where_True(string tuple,vector<string>&Tokens,int i)
+{
+    //cout<<"i:"<<i<<"   Tokens[i]:"<<Tokens[i]<<endl;
+    if(i+1==Tokens.size())return true;
+    //i is pointing to Students here;
+    i++;//After this inc i will point to where
+
+    int index=0;
+    for(auto x:attributes_of_table)
+    {
+        if(x==Tokens[i+1])//Tokens[i+1]==marks
+            break;
+        else
+            index++;
+    }
+    //after this index will be index of 'marks' in attributes_of_table
+
+    bool isFloat = isdigit(Tokens[i+3][0]);
+    
+    if(isFloat)//Floats
+    {   
+        float typecasted = stof(ExtractCol(tuple,index));
+        
+        if(Tokens[i+2]==">") {return typecasted > stof(Tokens[i+3]);}
+        if(Tokens[i+2]=="<") {return typecasted < stof(Tokens[i+3]);}
+        if(Tokens[i+2]=="=") {return typecasted == stof(Tokens[i+3]);}
+        if(Tokens[i+2]=="!=") {return typecasted != stof(Tokens[i+3]);}
+    }
+    else//Strings
+    {
+        if(Tokens[i+2]=="!=")     return ExtractCol(tuple,index) != (Tokens[i+3]);
+        else if(Tokens[i+2]=="=") return ExtractCol(tuple,index) == (Tokens[i+3]);
+    }
+}
+
+//Also VALID for where clause;
+void Helper_Select(vector<string>&Tokens,string TableNameInQuery,int i)
+{
+    if(Tokens[1]=="*")
+    {
+        fstream file;
+        file.open(TableNameInQuery+".txt",ios::in);
+        int attributes = Count_no_Attributes(TableNameInQuery);
+        
+        bool flag=false;
+        string tuple;
+        while(file && !file.eof())
+        {
+            flag=true;
+            getline(file,tuple);//<102,Dipak Yadav,99>
+            if(tuple.size()==0)break;
+
+            //cout<<"val:"<<Tokens[i]<<endl;
+            if(is_Where_True(tuple,Tokens,i))
+            {
+                for(int j=0;j<attributes;j++)
+                    cout<<left<<setw(25)<<ExtractCol(tuple,j);
+                cout<<endl;
+            }
+        }
+        if(!flag)
+            cout<<"No Records yet"<<endl;
+    }
+
+    else
+    {
+        vector<int>indices_of_att_in_query = Find_Indices(Tokens,attributes_of_table);
+
+        fstream file;
+        file.open(TableNameInQuery+".txt",ios::in);
+        
+        bool flag=false;
+        string tuple;
+
+        while(file && !file.eof())
+        {
+            flag=true;
+            getline(file,tuple);//<102,Dipak Yadav,99>
+            if(tuple.size()==0)break;
+            
+            if(is_Where_True(tuple,Tokens,i)){
+                for(int x:indices_of_att_in_query)
+                    cout<<left<<setw(25)<<ExtractCol(tuple,x);
+                cout<<endl;
+            }
+        }
+        if(!flag)
+            cout<<"No Records yet"<<endl;
+    }
+}
+
+void FillingAttributesOfTable(string tableName)
+{
+    attributes_of_table.clear();
+    fstream SchemaFile;
+    SchemaFile.open("SchemaFile.txt",ios::in);
+    string line;
+    while(!SchemaFile.eof())
+    {
+        getline(SchemaFile,line);
+        if(line[0]=='*')
+        {
+            string name = line.substr(1,line.size()-2);
+            if(name==tableName)
+            {
+                getline(SchemaFile,line);//<<
+                getline(SchemaFile,line);//pk: 
+
+                while(line!=">>")
+                {
+                    getline(SchemaFile,line);
+                    if(line==">>")break;
+
+                    string temp="";
+                    int i=0;
+                    while(line[i]!=' ')
+                    {
+                        temp += line[i];
+                        i++;
+                    }
+                    attributes_of_table.push_back(temp);
+                }
+
+                SchemaFile.close();
+                break;
+            }
+        }
+    }
+}
+void Select(vector<string>&Tokens)
+{
     int i=0;
     while(Tokens[i]!="from") i++;
     i++;//After this increment i will point to Students
@@ -617,9 +510,9 @@ void TableManager::Select(vector<string>& Tokens) {
     string tableName = Tokens[i];
     //Check whether table with specified name exists in Schema file or not
     {
-        if(schema.doesTableExists2(tableName))
+        if(doesTableExists2(tableName))
         {
-            schema.FillingAttributesOfTable(tableName);
+            FillingAttributesOfTable(tableName);
             Helper_Select(Tokens,tableName,i);//i is pointing to Students;
         }
         else
@@ -627,8 +520,39 @@ void TableManager::Select(vector<string>& Tokens) {
     }
 }
 
-void TableManager::UpdateTable(vector<string>& Tokens) {
-        string tableName = Tokens[1];
+
+vector<int>GetIndices(string tableName, map<string,string>mpp)
+{
+    FillingAttributesOfTable(tableName);
+    vector<int>ans;
+    
+    for(auto kv=mpp.begin();kv!=mpp.end();kv++)
+    {
+        int count=0;
+        for(auto x:attributes_of_table)
+        {   
+            //cout<<"attr:"<<x<<"     kv:"<<kv->first<<endl;
+            if(kv->first==x)
+                {ans.push_back(count);break;}
+            count++;
+        }
+    }
+    return ans;
+}
+vector<string> split (string s, char delim) {
+    vector<string> result;
+    stringstream ss (s);
+    string item;
+
+    while (getline (ss, item, delim)) {
+        result.push_back (item);
+    }
+
+    return result;
+}
+void UpdateTable(vector<string>&Tokens)
+{
+    string tableName = Tokens[1];
     //Finding position of where in Tokens
     bool isWhere=false;
     int i;
@@ -643,7 +567,7 @@ void TableManager::UpdateTable(vector<string>& Tokens) {
         //  and yes PK is getting updated, then dont update because each record will get same PK.
     
     fstream SchemaFile;
-    SchemaFile.open("SchemaFile.txt");
+    SchemaFile.open("SchemaFile.txt",ios::in);
 
     //Reading PK from Schema File
     string PK_fromSchema="";
@@ -681,28 +605,28 @@ void TableManager::UpdateTable(vector<string>& Tokens) {
         }
         
     fstream temp;
-    temp.open("temp.txt");
+    temp.open("temp.txt",ios::out);
 
     fstream table;
-    table.open(tableName+".txt");
+    table.open(tableName+".txt",ios::in);
 
     string tuple;
     vector<int>indices = GetIndices(tableName,mpp);//indices of keys, which we will be updating
     
     cout<<endl;
-    schema.FillingAttributesOfTable(tableName);
+    FillingAttributesOfTable(tableName);
     int rows_affected=0;
 
     while(table && !table.eof())
     {
         getline(table,tuple);
         if(tuple.size()==0)break;
-        vector<string>parsed = util.split(tuple.substr(1,tuple.size()-2),',');
+        vector<string>parsed = split(tuple.substr(1,tuple.size()-2),',');
         if(is_Where_True(tuple,Tokens,i))
         {
             rows_affected++;
             for(int index:indices)
-                parsed[index] = mpp[schema.attributes_of_table[index]];
+                parsed[index] = mpp[attributes_of_table[index]];
         }   
         temp << "<";
         for(auto ele:parsed)
@@ -720,15 +644,17 @@ void TableManager::UpdateTable(vector<string>& Tokens) {
     cout<<rows_affected<<" rows affected"<<endl;
 }
 
-void TableManager::DeleteFrom(vector<string>& Tokens) {
 
+void DeleteFrom(vector<string>&Tokens)
+{
+    
     //Where Clause not present, 
         //So delete the table itself..
         //But don't remove its details from the schema file..
     if(Tokens.size()==3)
     {
         fstream table;
-        table.open(Tokens[2]+".txt");
+        table.open(Tokens[2]+".txt",ios::in);
         string line;
         int count=0;
         while(table && !table.eof())
@@ -746,12 +672,12 @@ void TableManager::DeleteFrom(vector<string>& Tokens) {
     int originalCount=0;
     int duplicateCount=0;
 
-    schema.FillingAttributesOfTable(Tokens[2]);
+    FillingAttributesOfTable(Tokens[2]);
     fstream temp;
-    temp.open("temp.txt");
+    temp.open("temp.txt",ios::out);
 
     fstream table;
-    table.open(Tokens[2]+".txt");
+    table.open(Tokens[2]+".txt",ios::in);
 
     string tuple;
     
@@ -772,7 +698,5 @@ void TableManager::DeleteFrom(vector<string>& Tokens) {
     rename("temp.txt",tableName);
 
     cout<<originalCount-duplicateCount<<" rows affected"<<endl;
-
 }
-
 

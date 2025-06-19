@@ -28,8 +28,8 @@ void Help::HelpTables() {
 
     cout << "Tables in the database are : " << endl;
     string line;
-    while (!SchemaFile.eof()) {
-        getline(SchemaFile, line);
+    while (getline(SchemaFile, line)) {
+        //getline(SchemaFile, line);
         if (line.front() == '*' && line.back() == '*') // *Teacher*
             cout << line.substr(1, line.size() - 2) << endl;
     }

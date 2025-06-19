@@ -1,4 +1,4 @@
-# pragma once
+// # pragma once
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -32,8 +32,8 @@ bool ErrorHandling::doesTableExists(string tableName) const {
         return false;
 
     string line;
-    while (!SchemaFile.eof()) {
-        getline(SchemaFile, line);
+    while (getline(SchemaFile, line)) {
+        //getline(SchemaFile, line);
         if (!line.empty() && line[0] == '*') {
             string name = line.substr(1, line.size() - 2);
             if (name == tableName) {

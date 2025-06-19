@@ -13,7 +13,6 @@ int main(){
 
         getline(cin,Query); 
         cout<<endl;
-
         QueryProcessor qp;
         qp.run(Query);
         
