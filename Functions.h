@@ -665,6 +665,8 @@ void TableManager::UpdateTable(vector<string>& Tokens) {
         }
     }
 
+    cout<<"PK from Schema: "<<PK_fromSchema<<endl;
+
     //Geting Keys and Values from the Tokens
     map<string,string> mpp;
     bool flag=true;
@@ -680,14 +682,22 @@ void TableManager::UpdateTable(vector<string>& Tokens) {
             return;
         }
         
+    cout<<"fstream temp opened"<<endl;
     fstream temp;
     temp.open("temp.txt");
 
+    cout<<"fstream table opened"<<endl;
     fstream table;
     table.open(tableName+".txt");
 
     string tuple;
     vector<int>indices = GetIndices(tableName,mpp);//indices of keys, which we will be updating
+
+    cout<<"Updating table: "<<tableName<<endl;
+    cout<<"Indices = ";
+    for(auto index:indices)
+        cout<<index<<" ";
+    cout<<endl;
     
     cout<<endl;
     schema.FillingAttributesOfTable(tableName);

@@ -42,6 +42,8 @@ bool ErrorHandling::doesTableExists(string tableName) const {
             }
         }
     }
+
+    cout<<"table <"<<tableName<<"> doesn't exists"<<endl;
     SchemaFile.close();
     return false;
 }
