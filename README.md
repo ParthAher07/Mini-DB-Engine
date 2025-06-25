@@ -43,19 +43,19 @@ This project was developed to deeply understand how real DBMS systems parse, val
 ## 📸 Screenshots
 
 ### ✅ Create Table & Insert Into
-![Create & Insert](https://github.com/Saurabh2402/DBMS-CP/blob/main/Images/1.png)
+![Create & Insert](https://github.com/ParthAher07/Mini-DB-Engine/blob/main/Images/1.png)
 
 ### 🔍 Select Command
-![Select](https://github.com/Saurabh2402/DBMS-CP/blob/main/Images/2.png)
+![Select](https://github.com/ParthAher07/Mini-DB-Engine/blob/main/Images/2.png)
 
 ### ✏️ Update with Where Clause
-![Update](https://github.com/Saurabh2402/DBMS-CP/blob/main/Images/3.png)
+![Update](https://github.com/ParthAher07/Mini-DB-Engine/blob/main/Images/3.png)
 
 ### ❌ Delete with Where Clause
-![Delete](https://github.com/Saurabh2402/DBMS-CP/blob/main/Images/4.png)
+![Delete](https://github.com/ParthAher07/Mini-DB-Engine/blob/main/Images/4.png)
 
 ### ℹ️ Help & Describe
-![Help & Describe](https://github.com/Saurabh2402/DBMS-CP/blob/main/Images/5.png)
+![Help & Describe](https://github.com/ParthAher07/Mini-DB-Engine/blob/main/Images/5.png)
 
 ---
 
