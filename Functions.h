@@ -4,7 +4,7 @@ using namespace std;
 class TableManager; // Forward declaration to allow access to TableManager
 
 class Util {
-public:
+private:
     static string ExtractCol(const string& tuple, int colno);
     static bool isInt(const string& s);
     static vector<string> split(const string& s, char delim);
