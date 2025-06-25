@@ -83,10 +83,10 @@ This project was developed to deeply understand how real DBMS systems parse, val
 
 ### Steps
 
-# Step 1: Compile
+### Step 1: Compile
 g++ main.cpp -o datalite
 
-# Step 2: Run
+### Step 2: Run
 ./datalite
 
 ---
