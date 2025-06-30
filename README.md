@@ -75,7 +75,6 @@ This project was developed to deeply understand how real DBMS systems parse, val
 
 ---
 
-```markdown
 ## ▶️ How to Run
 
 ### Prerequisites
@@ -85,11 +84,15 @@ This project was developed to deeply understand how real DBMS systems parse, val
 ### Steps
 
 ### Step 1: Compile
+```bash
 g++ main.cpp -o datalite
+```
 
 ### Step 2: Run
+```bash
 ./datalite
 ```
+
 
 
 ---
